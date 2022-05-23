@@ -14,3 +14,6 @@
 #define TURN_LEFT 9
 #define TURN_RIGHT 10
 #define STOP 0
+
+const char* ssid     = "MyWiFiCar";
+const char* password = "12345678";

@@ -20,6 +20,15 @@
 #define TURN_RIGHT 10
 #define STOP 0
 
+#define FRONT_RIGHT_MOTOR 0
+#define FRONT_LEFT_MOTOR 1
+#define BACK_RIGHT_MOTOR 2
+#define BACK_LEFT_MOTOR 3
+
+#define FORWARD 1
+#define BACKWARD -1
+
+
 const char* ssid     = "MyWiFiCar";
 const char* password = "12345678";
 
@@ -62,3 +71,8 @@ void loop()
   RemoteXY_Handler ();
 
 }
+struct MOTOR_PINS
+{
+  int pinIN1;
+  int pinIN2;    
+};

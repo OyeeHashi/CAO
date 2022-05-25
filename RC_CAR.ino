@@ -27,3 +27,7 @@ const char* password = "12345678";
 #define REMOTEXY_WIFI_SSID "RemoteXY"
 #define REMOTEXY_WIFI_PASSWORD "12345678"
 #define REMOTEXY_SERVER_PORT 6377
+
+#pragma pack(push, 1)
+uint8_t RemoteXY_CONF[] =   // 19 bytes
+  { 255,2,0,0,0,12,0,16,31,1,5,0,16,40,30,30,2,26,31 };

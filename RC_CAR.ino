@@ -17,3 +17,13 @@
 
 const char* ssid     = "MyWiFiCar";
 const char* password = "12345678";
+
+// RemoteXY select connection mode and include library 
+#define REMOTEXY_MODE__ESP32CORE_WIFI_POINT
+
+#include <RemoteXY.h>
+
+// RemoteXY connection settings 
+#define REMOTEXY_WIFI_SSID "RemoteXY"
+#define REMOTEXY_WIFI_PASSWORD "12345678"
+#define REMOTEXY_SERVER_PORT 6377

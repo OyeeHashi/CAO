@@ -43,3 +43,17 @@ uint8_t RemoteXY_CONF[] =   // 19 bytes
   uint8_t connect_flag;  // =1 if wire connected, else =0 
 
 } RemoteXY;
+
+
+
+void setup() 
+{
+  RemoteXY_Init (); 
+  
+}
+
+void loop() 
+{ 
+  RemoteXY_Handler ();
+
+}

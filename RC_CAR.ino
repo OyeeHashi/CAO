@@ -28,10 +28,6 @@
 #define FORWARD 1
 #define BACKWARD -1
 
-
-const char* ssid     = "MyWiFiCar";
-const char* password = "12345678";
-
 // RemoteXY select connection mode and include library 
 #define REMOTEXY_MODE__ESP32CORE_WIFI_POINT
 
@@ -66,6 +62,13 @@ std::vector<MOTOR_PINS> motorPins =
   {27, 26},  //BACK_RIGHT_MOTOR
   {25, 33},  //BACK_LEFT_MOTOR   
 };
+
+const char* ssid     = "MyWiFiCar";
+const char* password = "12345678";
+
+AsyncWebServer server(80);
+AsyncWebSocket ws("/ws");
+
 void setup() 
 {
   RemoteXY_Init (); 

@@ -59,7 +59,13 @@ uint8_t RemoteXY_CONF[] =   // 19 bytes
 // } RemoteXY;
 
 
-
+std::vector<MOTOR_PINS> motorPins = 
+{
+  {16, 17},  //FRONT_RIGHT_MOTOR
+  {18, 19},  //FRONT_LEFT_MOTOR
+  {27, 26},  //BACK_RIGHT_MOTOR
+  {25, 33},  //BACK_LEFT_MOTOR   
+};
 void setup() 
 {
   RemoteXY_Init (); 

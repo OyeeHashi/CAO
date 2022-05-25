@@ -31,3 +31,15 @@ const char* password = "12345678";
 #pragma pack(push, 1)
 uint8_t RemoteXY_CONF[] =   // 19 bytes
   { 255,2,0,0,0,12,0,16,31,1,5,0,16,40,30,30,2,26,31 };
+
+
+  struct {
+
+    // input variables
+  int8_t joystick_1_x; // from -100 to 100  
+  int8_t joystick_1_y; // from -100 to 100  
+
+    // other variable
+  uint8_t connect_flag;  // =1 if wire connected, else =0 
+
+} RemoteXY;

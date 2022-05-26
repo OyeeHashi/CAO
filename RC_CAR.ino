@@ -184,6 +184,97 @@ void rotateMotor(int motorNumber, int motorDirection)
 }
 
 
+void processCarMovement(String inputValue)
+{
+  Serial.printf("Got value as %s %d\n", inputValue.c_str(), inputValue.toInt());
+  switch(inputValue.toInt())
+  {
+
+    case UP:
+      rotateMotor(FRONT_RIGHT_MOTOR, FORWARD);
+      rotateMotor(BACK_RIGHT_MOTOR, FORWARD);
+      rotateMotor(FRONT_LEFT_MOTOR, FORWARD);
+      rotateMotor(BACK_LEFT_MOTOR, FORWARD);
+      break;
+
+    case DOWN:
+      rotateMotor(FRONT_RIGHT_MOTOR, BACKWARD);
+      rotateMotor(BACK_RIGHT_MOTOR, BACKWARD);
+      rotateMotor(FRONT_LEFT_MOTOR, BACKWARD);
+      rotateMotor(BACK_LEFT_MOTOR, BACKWARD);
+      break;
+
+    case LEFT:
+      rotateMotor(FRONT_RIGHT_MOTOR, FORWARD);
+      rotateMotor(BACK_RIGHT_MOTOR, FORWARD);
+      rotateMotor(FRONT_LEFT_MOTOR, BACKWARD);
+      rotateMotor(BACK_LEFT_MOTOR, BACKWARD);
+      break;
+
+    case RIGHT:
+      rotateMotor(FRONT_RIGHT_MOTOR, BACKWARD);
+      rotateMotor(BACK_RIGHT_MOTOR, BACKWARD);
+      rotateMotor(FRONT_LEFT_MOTOR, FORWARD);
+      rotateMotor(BACK_LEFT_MOTOR, FORWARD);
+      break;
+
+    case UP_LEFT:
+      rotateMotor(FRONT_RIGHT_MOTOR, FORWARD);
+      rotateMotor(BACK_RIGHT_MOTOR, STOP);
+      rotateMotor(FRONT_LEFT_MOTOR, STOP);
+      rotateMotor(BACK_LEFT_MOTOR, FORWARD);
+      break;
+
+    case UP_RIGHT:
+      rotateMotor(FRONT_RIGHT_MOTOR, STOP);
+      rotateMotor(BACK_RIGHT_MOTOR, FORWARD);
+      rotateMotor(FRONT_LEFT_MOTOR, FORWARD);
+      rotateMotor(BACK_LEFT_MOTOR, STOP);
+      break;
+
+    case DOWN_LEFT:
+      rotateMotor(FRONT_RIGHT_MOTOR, STOP);
+      rotateMotor(BACK_RIGHT_MOTOR, BACKWARD);
+      rotateMotor(FRONT_LEFT_MOTOR, BACKWARD);
+      rotateMotor(BACK_LEFT_MOTOR, STOP);
+      break;
+
+    case DOWN_RIGHT:
+      rotateMotor(FRONT_RIGHT_MOTOR, BACKWARD);
+      rotateMotor(BACK_RIGHT_MOTOR, STOP);
+      rotateMotor(FRONT_LEFT_MOTOR, STOP);
+      rotateMotor(BACK_LEFT_MOTOR, BACKWARD);
+      break;
+
+    case TURN_LEFT:
+      rotateMotor(FRONT_RIGHT_MOTOR, FORWARD);
+      rotateMotor(BACK_RIGHT_MOTOR, FORWARD);
+      rotateMotor(FRONT_LEFT_MOTOR, BACKWARD);
+      rotateMotor(BACK_LEFT_MOTOR, BACKWARD);
+      break;
+
+    case TURN_RIGHT:
+      rotateMotor(FRONT_RIGHT_MOTOR, BACKWARD);
+      rotateMotor(BACK_RIGHT_MOTOR, BACKWARD);
+      rotateMotor(FRONT_LEFT_MOTOR, FORWARD);
+      rotateMotor(BACK_LEFT_MOTOR, FORWARD);
+      break;
+
+    case STOP:
+      rotateMotor(FRONT_RIGHT_MOTOR, STOP);
+      rotateMotor(BACK_RIGHT_MOTOR, STOP);
+      rotateMotor(FRONT_LEFT_MOTOR, STOP);
+      rotateMotor(BACK_LEFT_MOTOR, STOP);
+      break;
+
+    default:
+      rotateMotor(FRONT_RIGHT_MOTOR, STOP);
+      rotateMotor(BACK_RIGHT_MOTOR, STOP);
+      rotateMotor(FRONT_LEFT_MOTOR, STOP);
+      rotateMotor(BACK_LEFT_MOTOR, STOP);
+      break;
+  }
+}
 
 
 void handleRoot(AsyncWebServerRequest *request)

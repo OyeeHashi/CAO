@@ -28,26 +28,26 @@
 #define FORWARD 1
 #define BACKWARD -1
 
-// RemoteXY select connection mode and include library 
+// RemoteXY select connection mode and include library
 
 //   struct {
 
 //     // input variables
-//   int8_t joystick_1_x; // from -100 to 100  
-//   int8_t joystick_1_y; // from -100 to 100  
+//   int8_t joystick_1_x; // from -100 to 100
+//   int8_t joystick_1_y; // from -100 to 100
 
 //     // other variable
-//   uint8_t connect_flag;  // =1 if wire connected, else =0 
+//   uint8_t connect_flag;  // =1 if wire connected, else =0
 
 // } RemoteXY;
 
 
-std::vector<MOTOR_PINS> motorPins = 
+std::vector<MOTOR_PINS> motorPins =
 {
   {16, 17},  //FRONT_RIGHT_MOTOR
   {18, 19},  //FRONT_LEFT_MOTOR
   {27, 26},  //BACK_RIGHT_MOTOR
-  {25, 33},  //BACK_LEFT_MOTOR   
+  {25, 33},  //BACK_LEFT_MOTOR
 };
 
 const char* ssid     = "MyWiFiCar";
@@ -56,21 +56,21 @@ const char* password = "12345678";
 AsyncWebServer server(80);
 AsyncWebSocket ws("/ws");
 
-void setup() 
+void setup()
 {
-  RemoteXY_Init (); 
-  
+  RemoteXY_Init ();
+
 }
 
-void loop() 
-{ 
+void loop()
+{
   RemoteXY_Handler ();
 
 }
 struct MOTOR_PINS
 {
   int pinIN1;
-  int pinIN2;    
+  int pinIN2;
 };
 
 
@@ -96,7 +96,7 @@ const char* htmlHomePage PROGMEM = R"HTMLHOMEPAGE(
     }
     td:active {
       transform: translate(5px,5px);
-      box-shadow: none; 
+      box-shadow: none;
     }
     .noselect {
       -webkit-touch-callout: none; /* iOS Safari */
@@ -110,22 +110,22 @@ const char* htmlHomePage PROGMEM = R"HTMLHOMEPAGE(
     </style>
   </head>
   <body class="noselect" align="center" style="background-color:white">
-     
+
     <h1 style="color: teal;text-align:center;">MOTOR CONTROLLER</h1>
     <h2 style="color: teal;text-align:center;">Wi-Fi CAR Control</h2>
-    
+
     <table id="mainTable" style="width:400px;margin:auto;table-layout:fixed" CELLSPACING=10>
       <tr>
         <td style="background-color:white;box-shadow:none"></td>
         <td ontouchstart='onTouchStartAndEnd("1")' ontouchend='onTouchStartAndEnd("0")'><span class="arrows" >&#8679;</span></td>
       </tr>
-      
+
       <tr>
         <td ontouchstart='onTouchStartAndEnd("3")' ontouchend='onTouchStartAndEnd("0")'><span class="arrows" >&#8678;</span></td>
-        <td style="background-color:white;box-shadow:none"></td>   
+        <td style="background-color:white;box-shadow:none"></td>
         <td ontouchstart='onTouchStartAndEnd("4")' ontouchend='onTouchStartAndEnd("0")'><span class="arrows" >&#8680;</span></td>
       </tr>
-      
+
       <tr>
         <td ontouchstart='onTouchStartAndEnd("9")' ontouchend='onTouchStartAndEnd("0")'><span class="circularArrows" >&#8634;</span></td>
 
@@ -133,7 +133,7 @@ const char* htmlHomePage PROGMEM = R"HTMLHOMEPAGE(
         <td ontouchstart='onTouchStartAndEnd("10")' ontouchend='onTouchStartAndEnd("0")'><span class="circularArrows" >&#8635;</span></td>
 
       </tr>
-    
+
       <tr>
         <td style="background-color:white;box-shadow:none"></td>
       </tr>
@@ -141,25 +141,44 @@ const char* htmlHomePage PROGMEM = R"HTMLHOMEPAGE(
     <script>
       var webSocketUrl = "ws:\/\/" + window.location.hostname + "/ws";
       var websocket;
-      
-      function initWebSocket() 
+
+      function initWebSocket()
       {
         websocket = new WebSocket(webSocketUrl);
         websocket.onopen    = function(event){};
         websocket.onclose   = function(event){setTimeout(initWebSocket, 2000);};
         websocket.onmessage = function(event){};
       }
-      function onTouchStartAndEnd(value) 
+      function onTouchStartAndEnd(value)
       {
         websocket.send(value);
       }
-          
+
       window.onload = initWebSocket;
       document.getElementById("mainTable").addEventListener("touchend", function(event){
         event.preventDefault()
-      });      
+      });
     </script>
-    
+
   </body>
-</html> 
+</html>
 )HTMLHOMEPAGE";
+
+void rotateMotor(int motorNumber, int motorDirection)
+{
+  if (motorDirection == FORWARD)
+  {
+    digitalWrite(motorPins[motorNumber].pinIN1, HIGH);
+    digitalWrite(motorPins[motorNumber].pinIN2, LOW);
+  }
+  else if (motorDirection == BACKWARD)
+  {
+    digitalWrite(motorPins[motorNumber].pinIN1, LOW);
+    digitalWrite(motorPins[motorNumber].pinIN2, HIGH);
+  }
+  else
+  {
+    digitalWrite(motorPins[motorNumber].pinIN1, LOW);
+    digitalWrite(motorPins[motorNumber].pinIN2, LOW);
+  }
+}

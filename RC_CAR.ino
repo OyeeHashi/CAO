@@ -182,3 +182,88 @@ void rotateMotor(int motorNumber, int motorDirection)
     digitalWrite(motorPins[motorNumber].pinIN2, LOW);
   }
 }
+
+
+
+
+void handleRoot(AsyncWebServerRequest *request)
+{
+  request->send_P(200, "text/html", htmlHomePage);
+}
+
+void handleNotFound(AsyncWebServerRequest *request)
+{
+    request->send(404, "text/plain", "File Not Found");
+}
+
+
+void onWebSocketEvent(AsyncWebSocket *server,
+                      AsyncWebSocketClient *client,
+                      AwsEventType type,
+                      void *arg,
+                      uint8_t *data,
+                      size_t len)
+{
+  switch (type)
+  {
+    case WS_EVT_CONNECT:
+      Serial.printf("WebSocket client #%u connected from %s\n", client->id(), client->remoteIP().toString().c_str());
+      //client->text(getRelayPinsStatusJson(ALL_RELAY_PINS_INDEX));
+      break;
+    case WS_EVT_DISCONNECT:
+      Serial.printf("WebSocket client #%u disconnected\n", client->id());
+      processCarMovement("0");
+      break;
+    case WS_EVT_DATA:
+      AwsFrameInfo *info;
+      info = (AwsFrameInfo*)arg;
+      if (info->final && info->index == 0 && info->len == len && info->opcode == WS_TEXT)
+      {
+        std::string myData = "";
+        myData.assign((char *)data, len);
+        processCarMovement(myData.c_str());
+      }
+      break;
+    case WS_EVT_PONG:
+    case WS_EVT_ERROR:
+      break;
+    default:
+      break;
+  }
+}
+
+void setUpPinModes()
+{
+  for (int i = 0; i < motorPins.size(); i++)
+  {
+    pinMode(motorPins[i].pinIN1, OUTPUT);
+    pinMode(motorPins[i].pinIN2, OUTPUT);
+    rotateMotor(i, STOP);
+  }
+}
+
+
+//void setup(void)
+//{
+//  setUpPinModes();
+//  Serial.begin(115200);
+//
+//  WiFi.softAP(ssid, password);
+//  IPAddress IP = WiFi.softAPIP();
+//  Serial.print("AP IP address: ");
+//  Serial.println(IP);
+//
+//  server.on("/", HTTP_GET, handleRoot);
+//  server.onNotFound(handleNotFound);
+//
+//  ws.onEvent(onWebSocketEvent);
+//  server.addHandler(&ws);
+//
+//  server.begin();
+//  Serial.println("HTTP server started");
+//}
+
+//void loop()
+//{
+//  ws.cleanupClients();
+//}

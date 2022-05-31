@@ -12,42 +12,26 @@
 #define DOWN 2
 #define LEFT 3
 #define RIGHT 4
-#define UP_LEFT 5
-#define UP_RIGHT 6
-#define DOWN_LEFT 7
-#define DOWN_RIGHT 8
 #define TURN_LEFT 9
 #define TURN_RIGHT 10
 #define STOP 0
 
-#define FRONT_RIGHT_MOTOR 0
-#define FRONT_LEFT_MOTOR 1
-#define BACK_RIGHT_MOTOR 2
-#define BACK_LEFT_MOTOR 3
+#define RIGHT_MOTORS 0
+#define LEFT_MOTORS 1
 
 #define FORWARD 1
 #define BACKWARD -1
 
-// RemoteXY select connection mode and include library
-
-//   struct {
-
-//     // input variables
-//   int8_t joystick_1_x; // from -100 to 100
-//   int8_t joystick_1_y; // from -100 to 100
-
-//     // other variable
-//   uint8_t connect_flag;  // =1 if wire connected, else =0
-
-// } RemoteXY;
-
+struct MOTOR_PINS
+{
+  int pinIN1;
+  int pinIN2;
+};
 
 std::vector<MOTOR_PINS> motorPins =
 {
-  {16, 17},  //FRONT_RIGHT_MOTOR
-  {18, 19},  //FRONT_LEFT_MOTOR
-  {27, 26},  //BACK_RIGHT_MOTOR
-  {25, 33},  //BACK_LEFT_MOTOR
+  {27, 26},  //RIGHT_MOTORS
+  {25, 33},  //LEFT_MOTORS
 };
 
 const char* ssid     = "MyWiFiCar";
@@ -55,23 +39,6 @@ const char* password = "12345678";
 
 AsyncWebServer server(80);
 AsyncWebSocket ws("/ws");
-
-void setup()
-{
-  RemoteXY_Init ();
-
-}
-
-void loop()
-{
-  RemoteXY_Handler ();
-
-}
-struct MOTOR_PINS
-{
-  int pinIN1;
-  int pinIN2;
-};
 
 
 const char* htmlHomePage PROGMEM = R"HTMLHOMEPAGE(
@@ -164,6 +131,7 @@ const char* htmlHomePage PROGMEM = R"HTMLHOMEPAGE(
 </html>
 )HTMLHOMEPAGE";
 
+
 void rotateMotor(int motorNumber, int motorDirection)
 {
   if (motorDirection == FORWARD)
@@ -183,7 +151,6 @@ void rotateMotor(int motorNumber, int motorDirection)
   }
 }
 
-
 void processCarMovement(String inputValue)
 {
   Serial.printf("Got value as %s %d\n", inputValue.c_str(), inputValue.toInt());
@@ -191,91 +158,46 @@ void processCarMovement(String inputValue)
   {
 
     case UP:
-      rotateMotor(FRONT_RIGHT_MOTOR, FORWARD);
-      rotateMotor(BACK_RIGHT_MOTOR, FORWARD);
-      rotateMotor(FRONT_LEFT_MOTOR, FORWARD);
-      rotateMotor(BACK_LEFT_MOTOR, FORWARD);
+      rotateMotor(RIGHT_MOTORS, FORWARD);
+      rotateMotor(LEFT_MOTORS, FORWARD);
       break;
 
     case DOWN:
-      rotateMotor(FRONT_RIGHT_MOTOR, BACKWARD);
-      rotateMotor(BACK_RIGHT_MOTOR, BACKWARD);
-      rotateMotor(FRONT_LEFT_MOTOR, BACKWARD);
-      rotateMotor(BACK_LEFT_MOTOR, BACKWARD);
+      rotateMotor(RIGHT_MOTORS, BACKWARD);
+      rotateMotor(LEFT_MOTORS, BACKWARD);
       break;
 
     case LEFT:
-      rotateMotor(FRONT_RIGHT_MOTOR, FORWARD);
-      rotateMotor(BACK_RIGHT_MOTOR, FORWARD);
-      rotateMotor(FRONT_LEFT_MOTOR, BACKWARD);
-      rotateMotor(BACK_LEFT_MOTOR, BACKWARD);
+      rotateMotor(RIGHT_MOTORS, FORWARD);
+      rotateMotor(LEFT_MOTORS, BACKWARD);
       break;
 
     case RIGHT:
-      rotateMotor(FRONT_RIGHT_MOTOR, BACKWARD);
-      rotateMotor(BACK_RIGHT_MOTOR, BACKWARD);
-      rotateMotor(FRONT_LEFT_MOTOR, FORWARD);
-      rotateMotor(BACK_LEFT_MOTOR, FORWARD);
-      break;
-
-    case UP_LEFT:
-      rotateMotor(FRONT_RIGHT_MOTOR, FORWARD);
-      rotateMotor(BACK_RIGHT_MOTOR, STOP);
-      rotateMotor(FRONT_LEFT_MOTOR, STOP);
-      rotateMotor(BACK_LEFT_MOTOR, FORWARD);
-      break;
-
-    case UP_RIGHT:
-      rotateMotor(FRONT_RIGHT_MOTOR, STOP);
-      rotateMotor(BACK_RIGHT_MOTOR, FORWARD);
-      rotateMotor(FRONT_LEFT_MOTOR, FORWARD);
-      rotateMotor(BACK_LEFT_MOTOR, STOP);
-      break;
-
-    case DOWN_LEFT:
-      rotateMotor(FRONT_RIGHT_MOTOR, STOP);
-      rotateMotor(BACK_RIGHT_MOTOR, BACKWARD);
-      rotateMotor(FRONT_LEFT_MOTOR, BACKWARD);
-      rotateMotor(BACK_LEFT_MOTOR, STOP);
-      break;
-
-    case DOWN_RIGHT:
-      rotateMotor(FRONT_RIGHT_MOTOR, BACKWARD);
-      rotateMotor(BACK_RIGHT_MOTOR, STOP);
-      rotateMotor(FRONT_LEFT_MOTOR, STOP);
-      rotateMotor(BACK_LEFT_MOTOR, BACKWARD);
+      rotateMotor(RIGHT_MOTORS, BACKWARD);
+      rotateMotor(LEFT_MOTORS, FORWARD);
       break;
 
     case TURN_LEFT:
-      rotateMotor(FRONT_RIGHT_MOTOR, FORWARD);
-      rotateMotor(BACK_RIGHT_MOTOR, FORWARD);
-      rotateMotor(FRONT_LEFT_MOTOR, BACKWARD);
-      rotateMotor(BACK_LEFT_MOTOR, BACKWARD);
+      rotateMotor(RIGHT_MOTORS, FORWARD);
+      rotateMotor(LEFT_MOTORS, BACKWARD);
       break;
 
     case TURN_RIGHT:
-      rotateMotor(FRONT_RIGHT_MOTOR, BACKWARD);
-      rotateMotor(BACK_RIGHT_MOTOR, BACKWARD);
-      rotateMotor(FRONT_LEFT_MOTOR, FORWARD);
-      rotateMotor(BACK_LEFT_MOTOR, FORWARD);
+      rotateMotor(RIGHT_MOTORS, BACKWARD);
+      rotateMotor(LEFT_MOTORS, FORWARD);
       break;
 
     case STOP:
-      rotateMotor(FRONT_RIGHT_MOTOR, STOP);
-      rotateMotor(BACK_RIGHT_MOTOR, STOP);
-      rotateMotor(FRONT_LEFT_MOTOR, STOP);
-      rotateMotor(BACK_LEFT_MOTOR, STOP);
+      rotateMotor(RIGHT_MOTORS, STOP);
+      rotateMotor(LEFT_MOTORS, STOP);
       break;
 
     default:
-      rotateMotor(FRONT_RIGHT_MOTOR, STOP);
-      rotateMotor(BACK_RIGHT_MOTOR, STOP);
-      rotateMotor(FRONT_LEFT_MOTOR, STOP);
-      rotateMotor(BACK_LEFT_MOTOR, STOP);
+      rotateMotor(RIGHT_MOTORS, STOP);
+      rotateMotor(LEFT_MOTORS, STOP);
       break;
   }
 }
-
 
 void handleRoot(AsyncWebServerRequest *request)
 {
@@ -334,27 +256,27 @@ void setUpPinModes()
 }
 
 
-//void setup(void)
-//{
-//  setUpPinModes();
-//  Serial.begin(115200);
-//
-//  WiFi.softAP(ssid, password);
-//  IPAddress IP = WiFi.softAPIP();
-//  Serial.print("AP IP address: ");
-//  Serial.println(IP);
-//
-//  server.on("/", HTTP_GET, handleRoot);
-//  server.onNotFound(handleNotFound);
-//
-//  ws.onEvent(onWebSocketEvent);
-//  server.addHandler(&ws);
-//
-//  server.begin();
-//  Serial.println("HTTP server started");
-//}
+void setup(void)
+{
+  setUpPinModes();
+  Serial.begin(115200);
 
-//void loop()
-//{
-//  ws.cleanupClients();
-//}
+  WiFi.softAP(ssid, password);
+  IPAddress IP = WiFi.softAPIP();
+  Serial.print("AP IP address: ");
+  Serial.println(IP);
+
+  server.on("/", HTTP_GET, handleRoot);
+  server.onNotFound(handleNotFound);
+
+  ws.onEvent(onWebSocketEvent);
+  server.addHandler(&ws);
+
+  server.begin();
+  Serial.println("HTTP server started");
+}
+
+void loop()
+{
+  ws.cleanupClients();
+}

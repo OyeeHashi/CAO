@@ -7,7 +7,7 @@
 #include <ESPAsyncTCP.h>
 #endif
 #include <ESPAsyncWebServer.h>
-
+// Defining Constants
 #define UP 1
 #define DOWN 2
 #define LEFT 3
@@ -18,28 +18,37 @@
 
 #define RIGHT_MOTORS 0
 #define LEFT_MOTORS 1
-
 #define FORWARD 1
 #define BACKWARD -1
 
+
+
+// Creating Struct for Motor Pins thus handling objects
 struct MOTOR_PINS
 {
   int pinIN1;
   int pinIN2;
 };
 
+
 std::vector<MOTOR_PINS> motorPins =
 {
-  {27, 26},  //RIGHT_MOTORS
-  {25, 33},  //LEFT_MOTORS
+  {26, 27},  //RIGHT_MOTORS  PIN1,Pin2
+  {25, 33},  //LEFT_MOTORS   PIN1,Pin2
 };
 
-const char* ssid     = "MyWiFiCar";
+
+//Giving SOFTAP Credentials for Hotspot
+const char* ssid     = "Hashi's Car";
 const char* password = "12345678";
 
-AsyncWebServer server(80);
+//Golbal Variables for Asyn Web Server and Socket
+AsyncWebServer server(80);   //Port 80
 AsyncWebSocket ws("/ws");
 
+
+
+//Creating an HTML Page and storing that to the PROGMEM to send to the device
 
 const char* htmlHomePage PROGMEM = R"HTMLHOMEPAGE(
 <!DOCTYPE html>
@@ -109,22 +118,23 @@ const char* htmlHomePage PROGMEM = R"HTMLHOMEPAGE(
       var webSocketUrl = "ws:\/\/" + window.location.hostname + "/ws";
       var websocket;
 
+
+//      Initializing the WEBSOCKET
       function initWebSocket()
       {
         websocket = new WebSocket(webSocketUrl);
         websocket.onopen    = function(event){};
-        websocket.onclose   = function(event){setTimeout(initWebSocket, 2000);};
+        websocket.onclose   = function(event){setTimeout(initWebSocket, 2000);};  //TImeout for reconnecting set to 2 Seconds
         websocket.onmessage = function(event){};
       }
-      function onTouchStartAndEnd(value)
+      function onTouchStartAndEnd(value)    // Function to send value from device to ESP32
       {
-        websocket.send(value);
+        websocket.send(value);    // WEbsocket used to send the commands
       }
 
-      window.onload = initWebSocket;
-      document.getElementById("mainTable").addEventListener("touchend", function(event){
-        event.preventDefault()
-      });
+      window.onload = initWebSocket;    // WHen window is loaded on device it initialized websocket.
+//
+);
     </script>
 
   </body>
@@ -132,26 +142,29 @@ const char* htmlHomePage PROGMEM = R"HTMLHOMEPAGE(
 )HTMLHOMEPAGE";
 
 
+
+//Rotate Motor
+
 void rotateMotor(int motorNumber, int motorDirection)
 {
-  if (motorDirection == FORWARD)
+  if (motorDirection == FORWARD) // SETS the Right Side of Car Pins to 5V and 0V for Forward Move
   {
     digitalWrite(motorPins[motorNumber].pinIN1, HIGH);
     digitalWrite(motorPins[motorNumber].pinIN2, LOW);
   }
-  else if (motorDirection == BACKWARD)
+  else if (motorDirection == BACKWARD)  // Same as Forward but Voltage Direction changed.
   {
     digitalWrite(motorPins[motorNumber].pinIN1, LOW);
     digitalWrite(motorPins[motorNumber].pinIN2, HIGH);
   }
-  else
+  else   //No Potential Difference
   {
     digitalWrite(motorPins[motorNumber].pinIN1, LOW);
     digitalWrite(motorPins[motorNumber].pinIN2, LOW);
   }
 }
 
-void processCarMovement(String inputValue)
+void processCarMovement(String inputValue)    //
 {
   Serial.printf("Got value as %s %d\n", inputValue.c_str(), inputValue.toInt());
   switch(inputValue.toInt())
@@ -199,20 +212,28 @@ void processCarMovement(String inputValue)
   }
 }
 
+
+//Web Server on Request sends the HTML page to the DEVICE
+
+
 void handleRoot(AsyncWebServerRequest *request)
 {
   request->send_P(200, "text/html", htmlHomePage);
 }
+
+
+//IF not found sends the given error
 
 void handleNotFound(AsyncWebServerRequest *request)
 {
     request->send(404, "text/plain", "File Not Found");
 }
 
+//Defining Web Socket Events.
 
 void onWebSocketEvent(AsyncWebSocket *server,
                       AsyncWebSocketClient *client,
-                      AwsEventType type,
+                      AwsEventType type,   //Web server Event type
                       void *arg,
                       uint8_t *data,
                       size_t len)
@@ -221,7 +242,6 @@ void onWebSocketEvent(AsyncWebSocket *server,
   {
     case WS_EVT_CONNECT:
       Serial.printf("WebSocket client #%u connected from %s\n", client->id(), client->remoteIP().toString().c_str());
-      //client->text(getRelayPinsStatusJson(ALL_RELAY_PINS_INDEX));
       break;
     case WS_EVT_DISCONNECT:
       Serial.printf("WebSocket client #%u disconnected\n", client->id());
@@ -230,7 +250,7 @@ void onWebSocketEvent(AsyncWebSocket *server,
     case WS_EVT_DATA:
       AwsFrameInfo *info;
       info = (AwsFrameInfo*)arg;
-      if (info->final && info->index == 0 && info->len == len && info->opcode == WS_TEXT)
+      if (info->final && info->index == 0 && info->len == len && info->opcode == WS_TEXT)   //Default Values
       {
         std::string myData = "";
         myData.assign((char *)data, len);
@@ -245,6 +265,8 @@ void onWebSocketEvent(AsyncWebSocket *server,
   }
 }
 
+// For Setting up Pin Modes to output
+
 void setUpPinModes()
 {
   for (int i = 0; i < motorPins.size(); i++)
@@ -258,25 +280,28 @@ void setUpPinModes()
 
 void setup(void)
 {
-  setUpPinModes();
-  Serial.begin(115200);
+  setUpPinModes(); //Setting Pin Modes to the OUTPUT
+  Serial.begin(115200);    // Starting Serial Channel for console messages
 
-  WiFi.softAP(ssid, password);
-  IPAddress IP = WiFi.softAPIP();
-  Serial.print("AP IP address: ");
+  WiFi.softAP(ssid, password);    //Starting the Hotspot/ Access Point
+  IPAddress IP = WiFi.softAPIP();   //Storing IP of Hotspot to access on device
+  Serial.print("AP IP address: ");  // Printing on console
   Serial.println(IP);
 
+
+  // Assign callback of handleROOT to send the HTML WEBPAGE created to the device on request
   server.on("/", HTTP_GET, handleRoot);
-  server.onNotFound(handleNotFound);
+  server.onNotFound(handleNotFound);   //Handle error if not found
 
-  ws.onEvent(onWebSocketEvent);
-  server.addHandler(&ws);
+  server.begin();    // Starting Server
 
-  server.begin();
+  ws.onEvent(onWebSocketEvent);  //Tackling different web socket events received from the device
+  server.addHandler(&ws);        // Error Handler
+
   Serial.println("HTTP server started");
 }
 
 void loop()
 {
-  ws.cleanupClients();
+  ws.cleanupClients(); // WEbsocket own function to handle previous unused connection
 }
